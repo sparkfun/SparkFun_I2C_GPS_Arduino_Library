@@ -1,0 +1,37 @@
+#######################################
+# Syntax Coloring Map 
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+AK9750 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin			KEYWORD2
+getIR1 			KEYWORD2
+getIR2 			KEYWORD2
+getIR3 			KEYWORD2
+getIR4 			KEYWORD2
+refresh			KEYWORD2
+available		KEYWORD2
+overrun			KEYWORD2
+
+setMode			KEYWORD2
+setCutoffFrequency KEYWORD2
+
+getTemperature 	KEYWORD2
+getTemperatureF 	KEYWORD2
+
+softReset		KEYWORD2
+
+enableDebugging KEYWORD2
+disableDebugging KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
