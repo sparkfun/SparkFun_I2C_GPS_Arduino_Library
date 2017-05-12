@@ -3,7 +3,7 @@ SparkFun MediaTek I2C Interface Library
 
 ![SparkFun I2C Enabled GPS - Titan X1](https://cdn.sparkfun.com//assets/parts/1/2/2/8/0/Qwiic-GPS-1.jpg)
 
-[*SparkX Qwiic GPS - Titan X1 - AK9750(SPX-14312)*](https://www.sparkfun.com/products/14312)
+[*SparkX Qwiic GPS - Titan X1 (SPX-14312)*](https://www.sparkfun.com/products/14312)
 
 The Qwiic GPS uses the Titan X1 GPS module with special I2C firmware. This library talks to the GPS module over I2C.
 
