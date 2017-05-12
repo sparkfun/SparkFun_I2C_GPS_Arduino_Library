@@ -230,19 +230,16 @@ void displayInfo()
   if (gps.time.second() < 10) Serial.print(F("0"));
   Serial.print(gps.time.second());
 
-  if (gps.location.isValid())
-  {
-    Serial.print(" Loc:");
-    Serial.print(gps.location.lat(), 6);
-    Serial.print(F(","));
-    Serial.print(gps.location.lng(), 6);
+  Serial.print(" Loc:");
+  Serial.print(gps.location.lat(), 6);
+  Serial.print(F(","));
+  Serial.print(gps.location.lng(), 6);
 
-    Serial.print(F(" SIV:"));
-    Serial.print(gps.satellites.value());
+  Serial.print(F(" SIV:"));
+  Serial.print(gps.satellites.value());
 
-    Serial.print(F(" HDOP:"));
-    Serial.print(gps.hdop.value());
-  }
+  Serial.print(F(" HDOP:"));
+  Serial.print(gps.hdop.value()/100.0, 2); //TinyGPS reports DOPs in 100ths
 
   Serial.println();
 }

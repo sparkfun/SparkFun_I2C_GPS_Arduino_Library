@@ -106,7 +106,7 @@ void displayInfo()
   if (gps.hdop.isValid())
   {
     Serial.print(F(" HDOP:"));
-    Serial.print(gps.hdop.value());
+    Serial.print(gps.hdop.value()/100.0, 2); //TinyGPS reports DOPs in 100ths
   }
 
   Serial.println(); //Done printing alt, siv, hdop
