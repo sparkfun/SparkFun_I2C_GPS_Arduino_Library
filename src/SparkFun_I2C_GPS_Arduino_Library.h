@@ -65,7 +65,6 @@ class I2CGPS {
     uint8_t gpsData[MAX_PACKET_SIZE]; //The place to store valid incoming gps data
 
   private:
-    //uint8_t printI2CError(uint8_t errorCode); //Prints endTransmission statuses
 
     //Variables
     TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
