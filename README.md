@@ -23,7 +23,7 @@ Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* [Hookup Guide](https://learn.sparkfun.com/tutorials/sparkfun-gps-breakout---xa1110-qwiic-hookup-guide) - Hookup guide for the Sparkfun XA1110 GPS breakout board.
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/sparkfun-gps-breakout---xa1110-qwiic-hookup-guide)** - Hookup guide for the Sparkfun XA1110 GPS breakout board.
 
 Product Versions
 ----------------
