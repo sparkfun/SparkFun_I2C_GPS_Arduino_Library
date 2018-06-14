@@ -1,6 +1,6 @@
 /*
   Configure the Qwiic GPS module by sending PMTK packets
-  By: Nathan Seidle
+  By: Nathan Seidle, Owen Lyke
   SparkFun Electronics
   Date: April 12th, 2017
   License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
@@ -39,6 +39,17 @@ TinyGPSPlus gps; //Declare gps object
 TinyGPSCustom configureCmd(gps, "PMTK001", 1); //Packet number
 TinyGPSCustom configureFlag(gps, "PMTK001", 2); //Success/fail flag
 
+// The following tells the TinyGPS library to scan for the PMTK705 sentence.
+// This sentence is a response to a query of the firmware version
+TinyGPSCustom versionRelease(gps, "PMTK705", 1); // Release string
+TinyGPSCustom versionBuild(gps, "PMTK705", 2); // Build ID
+TinyGPSCustom versionModel(gps, "PMTK705", 3); // Product model
+// There can be a 4th version parameter but we are not terribly interested
+
+#define FW_OLD  1
+#define FW_NEW  2
+#define FW_UNKNOWN  0
+
 String configString;
 
 boolean debug = false; //Keeps track of the enable/disable of debug printing within the GPS lib
@@ -69,16 +80,15 @@ void loop()
     byte incoming = Serial.read();
     if (incoming == '1')
     {
-      //Packet 220: Set time between fixes (update rate)
-      //Milliseconds between output. 100 to 10,000 is allowed.
-      //Example 1 Hz: ",1000"
-      //Example 2 Hz: ",500"
-      //Example 10 Hz: ",100"
-      //NOTE: You must increase the baud rate to 57600bps or higher to reach 10Hz
-      configString = myI2CGPS.createMTKpacket(220, ",100");
-      myI2CGPS.sendMTKpacket(configString);
-
-      Serial.println(F("You must increase the baud rate to 57600bps or higher to reach 10Hz"));
+      Serial.println(F("Make sure the baud rate is 57600bps or higher to reach 10Hz"));
+        //Packet 220: Set time between fixes (update rate)
+        //Milliseconds between output. 100 to 10,000 is allowed.
+        //Example 1 Hz: ",1000"
+        //Example 2 Hz: ",500"
+        //Example 10 Hz: ",100"
+        //NOTE: You must increase the baud rate to 57600bps or higher to reach 10Hz
+        configString = myI2CGPS.createMTKpacket(220, ",100");
+        myI2CGPS.sendMTKpacket(configString);
     }
     else if (incoming == '2')
     {
@@ -117,9 +127,28 @@ void loop()
     }
     else if (incoming == '6')
     {
-      //Packet 251: Set serial baud rate to 57600
-      configString = myI2CGPS.createMTKpacket(251, ",57600");
-      myI2CGPS.sendMTKpacket(configString);
+      uint8_t FWversion = getFWversion();
+
+      if(FWversion == FW_OLD)
+      {
+        //Packet 251: Set serial baud rate to 57600
+        configString = myI2CGPS.createMTKpacket(251, ",57600");
+        myI2CGPS.sendMTKpacket(configString);
+      }
+      else if(FWversion == FW_NEW)
+      {
+        configString = myI2CGPS.createPGCMDpacket(232, ",5");
+        myI2CGPS.sendPGCMDpacket(configString);
+
+        configString = myI2CGPS.createMTKpacket(104, "");
+        myI2CGPS.sendMTKpacket(configString);
+      }
+      else
+      {
+        Serial.println(F("Firmware version unknown. Operation terminated."));
+        return;
+      }
+      
 
       Serial.println(F("Serial configuration command sent. No ACK is returned for this command."));
     }
@@ -158,6 +187,112 @@ void loop()
 
       Serial.println(F("Reset command sent. No ACK is returned for this command."));
     }
+    else if(incoming == 'a')
+    {
+      // Check firmware version
+      configString = myI2CGPS.createMTKpacket(605, "");
+      myI2CGPS.sendMTKpacket(configString);
+
+      Serial.print("Querying GPS version: ");
+      while(versionRelease.isUpdated() == false)
+      {
+        while (myI2CGPS.available()) //available() returns the number of new bytes available from the GPS module
+        {
+          gps.encode(myI2CGPS.read()); //Feed the GPS parser with a new .read() byte
+        }
+        Serial.print(F("."));
+      }
+      Serial.println("done!");
+      
+      Serial.print("Firmware version: ");
+      Serial.println(versionRelease.value());
+      Serial.print("Build ID: ");
+      Serial.println(versionBuild.value());
+      Serial.print("Model: ");
+      Serial.println(versionModel.value());
+      Serial.println();
+      
+    }
+    else if(incoming == 's')
+    {
+      char baud_code = 0;
+      uint8_t FWversion = FW_UNKNOWN;
+      
+      if(Serial.available() < 1)
+      {
+        Serial.println(F("Waiting for baud rate code. Enter a character '0' through '6'"));
+      }
+      while(Serial.available() < 1)
+      {
+        Serial.print(F("."));
+        delay(100);
+      }
+
+      baud_code = Serial.read();
+
+      if((baud_code < '0') || (baud_code > '6'))
+      {
+        Serial.println(F("Invalid baud rate code. Operation terminated"));
+        return;
+      }
+
+      FWversion = getFWversion();
+
+      if(FWversion == FW_OLD)
+      {
+        switch(baud_code)
+        {
+          case '0' : 
+            configString = myI2CGPS.createMTKpacket(251, ",4800");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+            
+          case '1' :
+            configString = myI2CGPS.createMTKpacket(251, ",9600");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+
+          case '2' :
+            configString = myI2CGPS.createMTKpacket(251, ",14400");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+
+          case '3' :
+            configString = myI2CGPS.createMTKpacket(251, ",19200");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+
+          case '4' :
+            configString = myI2CGPS.createMTKpacket(251, ",38400");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+
+          case '5' :
+            configString = myI2CGPS.createMTKpacket(251, ",57600");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+
+          case '6' :
+            configString = myI2CGPS.createMTKpacket(251, ",115200");
+            myI2CGPS.sendMTKpacket(configString);
+            break;
+        }
+      }
+      else if(FWversion == FW_NEW)
+      {
+        configString = myI2CGPS.createPGCMDpacket(232, (","+(String)baud_code));
+        myI2CGPS.sendPGCMDpacket(configString);
+
+        configString = myI2CGPS.createMTKpacket(104, "");
+        myI2CGPS.sendMTKpacket(configString);
+      }
+      else
+      {
+        Serial.println(F("Baud rate NOT updated"));
+        return;
+      }
+      Serial.println(F("Baud rate updated"));
+    }
     else
     {
       printMenu();
@@ -171,7 +306,7 @@ void loop()
 
   if (gps.time.isUpdated()) //Check to see if new GPS info is available
   {
-    displayInfo();
+    //displayInfo();
   }
 
   //Check to see if we got a response from any command we recently sent
@@ -196,7 +331,6 @@ void loop()
         Serial.print(F("Command successful"));
         break;
     }
-
     Serial.println();
   }
 
@@ -215,6 +349,17 @@ void printMenu(void)
   Serial.println(F("7) Enable DGPS/SBAS"));
   Serial.println(F("8) Enable/Disable Debugging"));
   Serial.println(F("9) Reset module"));
+  Serial.println(F("a) Query version information"));
+  Serial.println(F("s) Set baud rate:"));
+  Serial.println(F("--  0 : 4800"));
+  Serial.println(F("--  1 : 9600"));
+  Serial.println(F("--  2 : 14400"));
+  Serial.println(F("--  3 : 19200"));
+  Serial.println(F("--  4 : 38400"));
+  Serial.println(F("--  5 : 57600"));
+  Serial.println(F("--  6 : 115200"));
+
+  Serial.println();
 }
 
 void displayInfo()
@@ -242,5 +387,50 @@ void displayInfo()
   Serial.print(gps.hdop.value()/100.0, 2); //TinyGPS reports DOPs in 100ths
 
   Serial.println();
+}
+
+uint8_t getFWversion( void )
+{
+  // Check the firmware to determine what commands to use:
+      configString = myI2CGPS.createMTKpacket(605, "");
+      myI2CGPS.sendMTKpacket(configString);
+      while(versionRelease.isUpdated() == false)
+      {
+        while (myI2CGPS.available()) //available() returns the number of new bytes available from the GPS module
+        {
+          gps.encode(myI2CGPS.read()); //Feed the GPS parser with a new .read() byte
+        }
+      }
+      // Now the most recent firmware version data exists
+
+      if(versionRelease.value()[0] == 'A')
+      {
+        if(versionRelease.value()[4] >= '5')
+        {
+          return FW_NEW;
+        }
+        else
+        {
+          return FW_OLD;
+        }
+      }
+      else if(versionRelease.value()[0] == 'M')
+      {
+        if(versionRelease.value()[6] >= '5')
+        {
+          return FW_NEW;
+        }
+        else
+        {
+          return FW_OLD;
+        }
+      }
+      else
+      {
+        Serial.print(F("GPS firmware version ("));
+        Serial.print(versionRelease.value());
+        Serial.println(F(") unknown. Operation terminated."));
+        return FW_UNKNOWN;
+      }
 }
 
