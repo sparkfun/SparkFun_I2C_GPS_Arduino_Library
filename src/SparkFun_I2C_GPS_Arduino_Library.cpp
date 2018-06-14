@@ -219,3 +219,40 @@ String I2CGPS::calcCRCforMTK(String sentence)
 
   return (output);
 }
+
+
+boolean I2CGPS::sendPGCMDpacket(String command)
+{
+  sendMTKpacket(command); // Send process is the same, re-named to ease user's minds
+}
+
+String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
+{
+  //Build config sentence using packetType
+  String configSentence = "";
+  configSentence += "$PGCMD,"; //Default header for all PGCMD messages
+
+  //Attach the packetType number
+  //Append any leading zeros
+  if (packetType < 100) configSentence += "0";
+  if (packetType < 10) configSentence += "0";
+  configSentence += packetType;
+
+  //Attach any settings
+  if (dataField.length() > 0)
+  {
+    configSentence += dataField; //Attach the string of flags
+  }
+
+  configSentence += "*"; //Attach end tag
+
+  configSentence += calcCRCforMTK(configSentence); //Attach CRC - uses the same crc as PTMK
+
+  //Attach ending bytes
+  configSentence += '\r'; //Carriage return
+  configSentence += '\n'; //Line feed
+
+  return (configSentence);
+}
+
+

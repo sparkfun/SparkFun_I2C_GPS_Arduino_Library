@@ -1,7 +1,7 @@
 SparkFun MediaTek I2C Interface Library
 ===========================================================
 
-![SparkFun I2C Enabled GPS - Titan X1](https://cdn.sparkfun.com/assets/parts/1/2/3/4/0/14414-02.jpg)](https://cdn.sparkfun.com/assets/parts/1/2/3/4/0/14414-02.jpg)
+![SparkFun I2C Enabled GPS - Titan X1](https://cdn.sparkfun.com//assets/parts/1/2/2/8/0/Qwiic-GPS-1.jpg)
 
 [*SparkX Qwiic GPS - Titan X1 (SPX-14312)*](https://www.sparkfun.com/products/14312)
 
@@ -23,13 +23,7 @@ Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **[Hookup Guide](https://learn.sparkfun.com/tutorials/sparkfun-gps-breakout---xa1110-qwiic-hookup-guide)** - Hookup guide for the Sparkfun XA1110 GPS breakout board.
-
-Product Versions
-----------------
-
-* **[SEN-14414](https://github.com/sparkfun/SparkFun_GPS_Breakout_XA1110_Qwiic)** - Product repository (including hardware files) for the SparkFun GPS Breakout - XA1110.
-* **[SPX-14312](https://github.com/sparkfunx/Qwiic_GPS-TitanX1)** - Product repository (including hardware files) for the Titan X1 Qwiic breakout board.
+* **[Product Repository](https://github.com/sparkfunx/Qwiic_GPS-TitanX1)** - Main repository (including hardware files) for the Titan X1 Qwiic breakout board.
 
 License Information
 -------------------

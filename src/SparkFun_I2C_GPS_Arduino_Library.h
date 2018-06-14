@@ -61,6 +61,10 @@ class I2CGPS {
     String createMTKpacket(uint16_t packetType, String dataField);
     String calcCRCforMTK(String sentence); //XORs all bytes between $ and *
 
+    boolean sendPGCMDpacket(String command);
+    String createPGCMDpacket(uint16_t packetType, String dataField);
+    // Uses MTK CRC
+
     //Variables
     uint8_t gpsData[MAX_PACKET_SIZE]; //The place to store valid incoming gps data
 

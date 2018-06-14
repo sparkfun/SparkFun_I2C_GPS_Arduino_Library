@@ -19,6 +19,8 @@ read 			KEYWORD2
 sendMTKpacket 	KEYWORD2
 createMTKpacket	KEYWORD2
 calcCRCforMTK	KEYWORD2
+createPGCMDpacket	KEYWORD2
+sendPGCMDpacket	KEYWORD2
 
 enableDebugging KEYWORD2
 disableDebugging KEYWORD2
