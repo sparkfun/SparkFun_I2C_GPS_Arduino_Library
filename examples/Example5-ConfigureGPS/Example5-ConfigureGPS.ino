@@ -21,6 +21,11 @@
   Note that these settings are stored in battery backed memory and will be retained for
   approximately 15 days without power.
 
+  This example has been updated to include limited support for the new firmware (5.x.x) that
+  comes on the new modules. Use the techniques in this example along with the AirPrime software manual
+  (https://cdn.sparkfun.com/assets/b/c/4/4/5/AirPrime_XM_XA_Series_Software_User_Guide_r3.pdf)
+  to completely customize how the GPS module is set up
+
   Hardware Connections:
   Attach a Qwiic shield to your RedBoard or Uno.
   Plug the Qwiic sensor into any port.
@@ -389,6 +394,11 @@ void displayInfo()
   Serial.println();
 }
 
+// This function uses the custom TinyGPS parser (versionRelease, versionBuild, and versionModel)
+// to try and dtermine if the GPS is running the new or old firmware. If neither can be determine then
+// it will return a third value to signify UNKNOWN
+// The old firmware - on Titan X1 models - uses exclusively PMTK commands
+// The new firmware added some commands and (unfortunately) removed some of the PMTK commands so it needs to be handled differently
 uint8_t getFWversion( void )
 {
   // Check the firmware to determine what commands to use:
