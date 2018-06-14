@@ -1,7 +1,7 @@
 SparkFun MediaTek I2C Interface Library
 ===========================================================
 
-![SparkFun I2C Enabled GPS - Titan X1](https://cdn.sparkfun.com//assets/parts/1/2/2/8/0/Qwiic-GPS-1.jpg)
+![SparkFun I2C Enabled GPS - Titan X1](https://cdn.sparkfun.com/assets/parts/1/2/3/4/0/14414-02.jpg)](https://cdn.sparkfun.com/assets/parts/1/2/3/4/0/14414-02.jpg)
 
 [*SparkX Qwiic GPS - Titan X1 (SPX-14312)*](https://www.sparkfun.com/products/14312)
 
