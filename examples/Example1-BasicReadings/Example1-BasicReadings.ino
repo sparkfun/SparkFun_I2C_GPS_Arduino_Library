@@ -14,23 +14,26 @@
   Hardware Connections:
   Attach a Qwiic shield to your RedBoard or Uno.
   Plug the Qwiic sensor into any port.
-  Serial.print it out at 115200 baud to serial monitor.
+  PORT.print it out at 115200 baud to serial monitor.
 */
 
 #include "SparkFun_I2C_GPS_Arduino_Library.h" //Use Library Manager or download here: https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library
 I2CGPS myI2CGPS; //Hook object to the library
 
+#define PORT Serial
+//#define PORT SerialUSB
+
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("GTOP Read Example");
+  PORT.begin(115200);
+  PORT.println("GTOP Read Example");
 
-  if (myI2CGPS.begin() == false)
+  while (myI2CGPS.begin() == false)
   {
-    Serial.println("Module failed to respond. Please check wiring.");
-    while (1); //Freeze!
+    PORT.println("Module failed to respond. Please check wiring.");
+    delay(500);
   }
-  Serial.println("GPS module found!");
+  PORT.println("GPS module found!");
 }
 
 void loop()
@@ -39,9 +42,8 @@ void loop()
   {
     byte incoming = myI2CGPS.read(); //Read the latest byte from Qwiic GPS
 
-    if(incoming == '$') Serial.println(); //Break the sentences onto new lines
-    Serial.write(incoming); //Print this character
+    if(incoming == '$') PORT.println(); //Break the sentences onto new lines
+    PORT.write(incoming); //Print this character
   }
 }
-
 
