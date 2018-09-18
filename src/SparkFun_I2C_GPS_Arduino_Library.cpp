@@ -110,7 +110,7 @@ uint8_t I2CGPS::read(void)
 }
 
 //Enables serial printing of local error messages
-void I2CGPS::enableDebugging(Stream &debugPort = Serial)
+void I2CGPS::enableDebugging(Stream &debugPort)
 {
   _debugSerial = &debugPort; //Grab which port the user wants us to use for debugging
 
