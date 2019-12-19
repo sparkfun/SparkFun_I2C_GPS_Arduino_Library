@@ -228,7 +228,7 @@ String I2CGPS::calcCRCforMTK(String sentence)
 
 boolean I2CGPS::sendPGCMDpacket(String command)
 {
-  sendMTKpacket(command); // Send process is the same, re-named to ease user's minds
+  return (sendMTKpacket(command)); // Send process is the same, re-named to ease user's minds
 }
 
 String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
