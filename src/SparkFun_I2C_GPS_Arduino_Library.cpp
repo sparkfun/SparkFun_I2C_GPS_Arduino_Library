@@ -60,9 +60,9 @@ void I2CGPS::check()
   //TODO: Re-write this function to be less tied to Arduino's 32 byte limit
   //Maybe pass a maxRead during .begin()
 
-  for (uint8_t x = 0 ; x < MAX_PACKET_SIZE ; x++)
+  for (uint8_t x = 0; x < MAX_PACKET_SIZE; x++)
   {
-    if (x % 32 == 0) //Arduino can only Wire.read() in 32 byte chunks. Yay.
+    if (x % 32 == 0)                          //Arduino can only Wire.read() in 32 byte chunks. Yay.
       _i2cPort->requestFrom(MT333x_ADDR, 32); //Request 32 more bytes
 
     uint8_t incoming = _i2cPort->read();
@@ -76,7 +76,6 @@ void I2CGPS::check()
         _debugSerial->println(F("Buffer overrun"));
     }
   }
-
 }
 
 //Returns # of available bytes that can be read
@@ -90,8 +89,10 @@ uint8_t I2CGPS::available()
   }
 
   //Return new data count
-  if (_head > _tail) return (_head - _tail);
-  if (_tail > _head) return (MAX_PACKET_SIZE - _tail + _head);
+  if (_head > _tail)
+    return (_head - _tail);
+  if (_tail > _head)
+    return (MAX_PACKET_SIZE - _tail + _head);
   return (0); //No data available
 }
 
@@ -102,7 +103,8 @@ uint8_t I2CGPS::read(void)
   if (_tail != _head)
   {
     uint8_t datum = gpsData[_tail++];
-    if (_tail == MAX_PACKET_SIZE) _tail = 0; //Wrap variable
+    if (_tail == MAX_PACKET_SIZE)
+      _tail = 0; //Wrap variable
     return (datum);
   }
   else
@@ -123,7 +125,6 @@ void I2CGPS::disableDebugging()
   _printDebug = false; //Turn off extra print statements
 }
 
-
 //Functions for sending commands to the GPS module
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -141,12 +142,13 @@ boolean I2CGPS::sendMTKpacket(String command)
   }
 
   //Arduino can only Wire.write() in 32 byte chunks. Yay.
-  for (uint8_t chunk = 0 ; chunk < 7 ; chunk++) //8 chunks * 32 = 256 bytes total so we need to shave one
+  for (uint8_t chunk = 0; chunk < 7; chunk++) //8 chunks * 32 = 256 bytes total so we need to shave one
   {
     _i2cPort->beginTransmission(MT333x_ADDR);
-    for (uint8_t x = 0 ; x < 32 ; x++) //Send out 32 bytes
+    for (uint8_t x = 0; x < 32; x++) //Send out 32 bytes
     {
-      if ( (chunk * 32 + x) == command.length()) break; //We're done!
+      if ((chunk * 32 + x) == command.length())
+        break; //We're done!
       _i2cPort->write(command[(chunk * 32) + x]);
     }
     _i2cPort->endTransmission();
@@ -158,15 +160,16 @@ boolean I2CGPS::sendMTKpacket(String command)
   if (command.length() > (7 * 32)) //Do we have more than 224 bytes? Then send last 31
   {
     _i2cPort->beginTransmission(MT333x_ADDR);
-    for (uint8_t x = 0 ; x < 31 ; x++) //Write any remaining bytes up to 255
+    for (uint8_t x = 0; x < 31; x++) //Write any remaining bytes up to 255
     {
-      if ( (7 * 32 + x) == command.length()) break; //We're done!
+      if ((7 * 32 + x) == command.length())
+        break; //We're done!
       _i2cPort->write(command[(7 * 32) + x]);
     }
     _i2cPort->endTransmission();
   }
-  
-  return(true);
+
+  return (true);
 }
 
 //Given a packetType and any settings, return string that is a full
@@ -181,8 +184,10 @@ String I2CGPS::createMTKpacket(uint16_t packetType, String dataField)
 
   //Attach the packetType number
   //Append any leading zeros
-  if (packetType < 100) configSentence += "0";
-  if (packetType < 10) configSentence += "0";
+  if (packetType < 100)
+    configSentence += "0";
+  if (packetType < 10)
+    configSentence += "0";
   configSentence += packetType;
 
   //Attach any settings
@@ -210,16 +215,16 @@ String I2CGPS::calcCRCforMTK(String sentence)
 
   //We need to ignore the first character $
   //And the last character *
-  for (uint8_t x = 1 ; x < sentence.length() - 1 ; x++)
+  for (uint8_t x = 1; x < sentence.length() - 1; x++)
     crc ^= sentence[x]; //XOR this byte with all the others
 
   String output = "";
-  if (crc < 10) output += "0"; //Append leading zero if needed
+  if (crc < 10)
+    output += "0"; //Append leading zero if needed
   output += String(crc, HEX);
 
   return (output);
 }
-
 
 boolean I2CGPS::sendPGCMDpacket(String command)
 {
@@ -234,8 +239,10 @@ String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
 
   //Attach the packetType number
   //Append any leading zeros
-  if (packetType < 100) configSentence += "0";
-  if (packetType < 10) configSentence += "0";
+  if (packetType < 100)
+    configSentence += "0";
+  if (packetType < 10)
+    configSentence += "0";
   configSentence += packetType;
 
   //Attach any settings
@@ -254,5 +261,3 @@ String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
 
   return (configSentence);
 }
-
-
