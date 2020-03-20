@@ -27,13 +27,21 @@
 
 #pragma once
 
-#if (ARDUINO >= 100)
+#if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
-#else
+#include <Wire.h>
+#elif defined(ARDUINO) && ARDUINO < 100
 #include "WProgram.h"
+#include <Wire.h>
+#elif defined(__MBED__)
+#include "mbed.h"
+#include "externs.h"
+#include <cstdlib>
+#include <string>
+#include "TinyGPSPlus/TinyGPS++.h"
 #endif
 
-#include <Wire.h>
+
 
 #define MT333x_ADDR 0x10 //7-bit unshifted default I2C Address
 
@@ -47,16 +55,26 @@
 class I2CGPS {
   public:
 
-    //By default use Wire, standard I2C speed, and the defaul AK9750 address
+    //By default use Wire, standard I2C speed, and the default AK9750 address
+    #if defined(ARDUINO)
     boolean begin(TwoWire &wirePort = Wire, uint32_t i2cSpeed = I2C_SPEED_STANDARD);
+    #elif defined (__MBED__)
+    bool begin(I2C &wirePort = i2c, uint32_t i2cSpeed = I2C_SPEED_STANDARD);
+    #endif
 
     void check(); //Checks module for new data
     uint8_t available(); //Returns available number of bytes. Will call check() if zero is available.
     uint8_t read(); //Returns the next available byte
 
+    #if defined(ARDUINO)
     void enableDebugging(Stream &debugPort = Serial); //Output various extra messages to help with debug
+    #elif defined (__MBED__)
+    void enableDebugging(Stream &debugPort = pc);
+    #endif
+
     void disableDebugging();
 
+    #if defined(ARDUINO)
     boolean sendMTKpacket(String command);
     String createMTKpacket(uint16_t packetType, String dataField);
     String calcCRCforMTK(String sentence); //XORs all bytes between $ and *
@@ -65,16 +83,31 @@ class I2CGPS {
     String createPGCMDpacket(uint16_t packetType, String dataField);
     // Uses MTK CRC
 
+    #elif defined (__MBED__)
+    bool sendMTKpacket(string command);
+    string createMTKpacket(uint16_t packetType, string dataField);
+    string calcCRCforMTK(string sentence); //XORs all bytes between $ and *
+
+    bool sendPGCMDpacket(string command);
+    string createPGCMDpacket(uint16_t packetType, string dataField);
+    #endif
+
     //Variables
     uint8_t gpsData[MAX_PACKET_SIZE]; //The place to store valid incoming gps data
 
   private:
 
     //Variables
+    #if defined(ARDUINO)
     TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
+    boolean _printDebug = false; //Flag to print the serial commands we are sending to the Serial port for debug
+    #elif defined (__MBED__)
+    I2C *_i2cPort; //The generic connection to user's chosen I2C hardware
+    bool _printDebug = false; //Flag to print the serial commands we are sending to the Serial port for debug
+    #endif
     uint8_t _i2caddr;
 
-    boolean _printDebug = false; //Flag to print the serial commands we are sending to the Serial port for debug
+    
 
     Stream *_debugSerial; //The stream to send debug messages to if enabled
 
