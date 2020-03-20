@@ -117,7 +117,7 @@ void I2CGPS::check()
   for (uint8_t x = 0; x < MAX_PACKET_SIZE; x++)
   {
         buffer[0]='\0';
-        int err_read = _i2cPort->read(MT333x_ADDR << 1|1, (char *)& buffer[x], 1);
+        _i2cPort->read(MT333x_ADDR << 1|1, (char *)& buffer[x], 1);
 
     if (buffer[x] != 0x0A)
     {
@@ -237,7 +237,7 @@ bool I2CGPS::sendMTKpacket(string command)
 
     return (false);
   }
-  _debugSerial->printf("command: %s   length: %d\n", command.c_str(), command.length());
+ 
   _i2cPort->write(MT333x_ADDR << 1, command.c_str(), command.length());
   ThisThread::sleep_for(10);
 
@@ -269,7 +269,6 @@ string I2CGPS::createMTKpacket(uint16_t packetType, string dataField)
   if (packetType < 10)
     configSentence += "0";
   configSentence += to_string(packetType);
-  //_debugSerial->printf("packet type: %d    c sentence: %s\n", packetType, configSentence.c_str());
 
   //Attach any settings
   if (dataField.length() > 0)
