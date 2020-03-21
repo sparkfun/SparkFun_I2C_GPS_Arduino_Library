@@ -5,55 +5,7 @@
 I2C i2c(I2C1_SDA, I2C1_SCL);
 Serial pc(USBTX, USBRX, 115200);
 I2CGPS myI2CGPS;
-TinyGPSPlus gps;
 string configString;
-
-//Display new GPS info
-void displayInfo()
-{
-  //We have new GPS data to deal with!
-  pc.printf("\n");
-
-  // display date time
-  if (gps.time.isValid())
-  {
-    pc.printf("Datum: %d/%02d/%02d  --  %02d:%02d:%02d\n",
-                         gps.date.year(), gps.date.month(), gps.date.day(),
-                         gps.time.hour(), gps.time.minute(), gps.time.second());
-  }
-  else
-  {
-    pc.printf("Time not yet valid\n");
-  }
-
-  // display location
-  if (gps.location.isValid())
-  {
-    pc.printf("Location: %f, %f\n", gps.location.lat(), gps.location.lng());
-  }
-  else
-  {
-    pc.printf("Location not yet valid\n");
-  }
-
-  // display altitude
-  if (gps.altitude.isValid())
-  {
-    pc.printf("Altitude in meters: %f in feet: %f\n", gps.altitude.meters(), gps.altitude.feet());
-  }
-
-  // display satellite stats
-  if (gps.satellites.isValid())
-  {
-    pc.printf(" Satellites in View: %d", gps.satellites.value());
-  }
-
-  // display HDOP
-  if (gps.hdop.isValid())
-  {
-    pc.printf(" HDOP: %.2f\n", (gps.hdop.value()/100.0));
-  }
-}
 
 
 // main() runs in its own thread in the OS
