@@ -83,7 +83,6 @@ bool I2CGPS::begin(I2C &wirePort, uint32_t i2cSpeed)
 //Reads a 255 byte packet from GPS module
 //If new data is there, appends it to the gpsData array
 //Function requires 26ms @ 100kHz I2C, 9ms @ 400kHz I2C so call sparingly
-#if defined (ARDUINO)
 void I2CGPS::check()
 {
   //TODO: Re-write this function to be less tied to Arduino's 32 byte limit
@@ -91,10 +90,15 @@ void I2CGPS::check()
 
   for (uint8_t x = 0; x < MAX_PACKET_SIZE; x++)
   {
+    #if defined (ARDUINO)
     if (x % 32 == 0)                          //Arduino can only Wire.read() in 32 byte chunks. Yay.
       _i2cPort->requestFrom(MT333x_ADDR, 32); //Request 32 more bytes
 
     uint8_t incoming = _i2cPort->read();
+    #elif defined (__MBED__)
+    uint8_t incoming;
+    _i2cPort->read(MT333x_ADDR << 1|1, (char *)&incoming, 1);
+    #endif
 
     if (incoming != 0x0A)
     {
@@ -103,34 +107,14 @@ void I2CGPS::check()
       _head %= MAX_PACKET_SIZE; //Wrap variable
 
       if (_printDebug == true && _head == _tail)
+        #if defined (ARDUINO)
         _debugSerial->println(F("Buffer overrun"));
-    }
-  }
-}
-
-#elif defined (__MBED__)
-void I2CGPS::check()
-{
-  //TODO: Re-write this function to be less tied to Arduino's 32 byte limit
-  //Maybe pass a maxRead during .begin()
-
-  for (uint8_t x = 0; x < MAX_PACKET_SIZE; x++)
-  {
-        buffer[0]='\0';
-        _i2cPort->read(MT333x_ADDR << 1|1, (char *)& buffer[x], 1);
-
-    if (buffer[x] != 0x0A)
-    {
-      //Record this byte
-      gpsData[_head++] = buffer[x];
-      _head %= MAX_PACKET_SIZE; //Wrap variable
-
-      if (_printDebug == true && _head == _tail)
+        #elif defined (__MBED__)
         _debugSerial->printf("Buffer overrun\n");
+        #endif
     }
   }
 }
-#endif
 
 //Returns # of available bytes that can be read
 uint8_t I2CGPS::available()
