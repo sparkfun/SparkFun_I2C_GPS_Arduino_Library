@@ -7,7 +7,9 @@ SparkFun MediaTek I2C Interface Library
 
 The Qwiic GPS uses the Titan X1 GPS module with special I2C firmware. This library talks to the GPS module over I2C.
 
-We recommend using the [TinyGPS++ library](https://github.com/mikalhart/TinyGPSPlus) in addition to this library. Works like a champ together.
+For Arduino we recommend using the [TinyGPS++ library](https://github.com/mikalhart/TinyGPSPlus) in addition to this library. Works like a champ together.
+
+For mBed-OS use [codygrays port of the TinyGPS++ library](https://github.com/codygray/TinyGPSPlus/tree/universal) instead.
 
 Library written by Nathan Seidle ([SparkFun](http://www.sparkfun.com)).
 
@@ -15,9 +17,11 @@ Repository Contents
 -------------------
 
 * **/examples** - Example sketches for the library (.ino). Run these from the Arduino IDE. 
-* **/src** - Source files for the library (.cpp, .h).
+* **/src** - Source files for the library (.cpp, .h). These are hybridized versions that work under Arduino and mBed as well.
 * **keywords.txt** - Keywords from this library that will be highlighted in the Arduino IDE. 
-* **library.properties** - General library properties for the Arduino package manager. 
+* **library.properties** - General library properties for the Arduino package manager.
+* **main.cpp** Basic example code for mBed-OS.
+* **externs.h** Needed by mBed-OS to let .h and .cpp files use the same I2C and Serial definition.
 
 Documentation
 --------------
