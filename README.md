@@ -20,8 +20,8 @@ Repository Contents
 * **/src** - Source files for the library (.cpp, .h). These are hybridized versions that work under Arduino and mBed as well.
 * **keywords.txt** - Keywords from this library that will be highlighted in the Arduino IDE. 
 * **library.properties** - General library properties for the Arduino package manager.
-* **main.cpp** Basic example code for mBed-OS.
-* **externs.h** Needed by mBed-OS to let .h and .cpp files use the same I2C and Serial definition.
+* **main.cpp** - Basic example code for mBed-OS.
+* **externs.h** - Needed by mBed-OS to let .h and .cpp files use the same I2C and Serial definition.
 
 Documentation
 --------------
