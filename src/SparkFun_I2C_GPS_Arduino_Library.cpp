@@ -31,7 +31,6 @@
 #include <iostream>
 #include <stdlib.h>
 char dummy = 0;
-char buffer[255];
 #endif
 
 //Sets up the sensor for constant read
