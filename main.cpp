@@ -1,5 +1,5 @@
 #include "mbed.h"
-#include "lib/SparkFun_I2C_GPS_Reading_and_Control/SparkFun_I2C_GPS_Arduino_Library.h"
+#include "src/SparkFun_I2C_GPS_Reading_and_Control/SparkFun_I2C_GPS_Arduino_Library.h"
 #include "externs.h"
 
 I2C i2c(I2C1_SDA, I2C1_SCL);
