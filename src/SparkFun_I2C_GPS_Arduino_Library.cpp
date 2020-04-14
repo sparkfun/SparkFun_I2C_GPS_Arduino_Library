@@ -27,8 +27,15 @@
 
 #include "SparkFun_I2C_GPS_Arduino_Library.h"
 
+#if defined(__MBED__)
+#include <iostream>
+#include <stdlib.h>
+char dummy = 0;
+#endif
+
 //Sets up the sensor for constant read
 //Returns false if sensor does not respond
+#if defined (ARDUINO)
 boolean I2CGPS::begin(TwoWire &wirePort, uint32_t i2cSpeed)
 {
   //Bring in the user's choices
@@ -51,6 +58,26 @@ boolean I2CGPS::begin(TwoWire &wirePort, uint32_t i2cSpeed)
     return (false); //Module failed to respond
 }
 
+#elif defined(__MBED__)
+bool I2CGPS::begin(I2C &wirePort, uint32_t i2cSpeed)
+{
+  //Bring in the user's choices
+  _i2cPort = &wirePort; //Grab which port the user wants us to use
+
+  _i2cPort->frequency(i2cSpeed);
+
+  _head = 0; //Reset the location holder
+  _tail = 0;
+
+  _i2cPort->write(MT333x_ADDR << 1, (char *) &dummy, sizeof(dummy));
+
+  if (0 == _i2cPort->read(MT333x_ADDR << 1|1, (char *) &dummy, sizeof(dummy)))      // might fail if current is unstable on GPIO pins
+    return (true);
+  else
+    return (false);
+}
+#endif
+
 //Polls the GPS module to see if new data is available
 //Reads a 255 byte packet from GPS module
 //If new data is there, appends it to the gpsData array
@@ -62,10 +89,16 @@ void I2CGPS::check()
 
   for (uint8_t x = 0; x < MAX_PACKET_SIZE; x++)
   {
+    #if defined (ARDUINO)
     if (x % 32 == 0)                          //Arduino can only Wire.read() in 32 byte chunks. Yay.
       _i2cPort->requestFrom(MT333x_ADDR, 32); //Request 32 more bytes
 
     uint8_t incoming = _i2cPort->read();
+    #elif defined (__MBED__)
+    uint8_t incoming;
+    _i2cPort->read(MT333x_ADDR << 1|1, (char *)&incoming, 1);
+    #endif
+
     if (incoming != 0x0A)
     {
       //Record this byte
@@ -73,7 +106,11 @@ void I2CGPS::check()
       _head %= MAX_PACKET_SIZE; //Wrap variable
 
       if (_printDebug == true && _head == _tail)
+        #if defined (ARDUINO)
         _debugSerial->println(F("Buffer overrun"));
+        #elif defined (__MBED__)
+        _debugSerial->printf("Buffer overrun\n");
+        #endif
     }
   }
 }
@@ -131,6 +168,7 @@ void I2CGPS::disableDebugging()
 //Send a given command or configuration string to the module
 //The input buffer on the MTK is 255 bytes. Caller must keep strings shorter than 255 bytes
 //Any time you end transmission you must give the module 10ms to process bytes
+#if defined (ARDUINO)
 boolean I2CGPS::sendMTKpacket(String command)
 {
   if (command.length() > 255)
@@ -172,14 +210,39 @@ boolean I2CGPS::sendMTKpacket(String command)
   return (true);
 }
 
+#elif defined (__MBED__)
+bool I2CGPS::sendMTKpacket(string command)
+{
+  if (command.length() > 255)
+  {
+    if (_printDebug == true)
+      _debugSerial->printf("Command message too long!\n");
+
+    return (false);
+  }
+ 
+  _i2cPort->write(MT333x_ADDR << 1, command.c_str(), command.length());
+  ThisThread::sleep_for(10);
+
+  return (true);
+}
+#endif
+
 //Given a packetType and any settings, return string that is a full
 //config sentence complete with CRC and \r \n ending bytes
 //PMTK uses a different packet numbers to do configure the module.
 //These vary from 0 to 999. See 'MTK NMEA Packet' datasheet for more info.
+#if defined (ARDUINO)
 String I2CGPS::createMTKpacket(uint16_t packetType, String dataField)
 {
   //Build config sentence using packetType
   String configSentence = "";
+#elif defined (__MBED__)
+string I2CGPS::createMTKpacket(uint16_t packetType, string dataField)
+{
+  //Build config sentence using packetType
+  string configSentence = "";
+#endif
   configSentence += "$PMTK"; //Default header for all GPS config messages
 
   //Attach the packetType number
@@ -188,7 +251,7 @@ String I2CGPS::createMTKpacket(uint16_t packetType, String dataField)
     configSentence += "0";
   if (packetType < 10)
     configSentence += "0";
-  configSentence += packetType;
+  configSentence += to_string(packetType);
 
   //Attach any settings
   if (dataField.length() > 0)
@@ -209,8 +272,13 @@ String I2CGPS::createMTKpacket(uint16_t packetType, String dataField)
 
 //Calculate CRC for MTK messages
 //Given a string of characters, XOR them all together and return CRC in string form
+#if defined (ARDUINO)
 String I2CGPS::calcCRCforMTK(String sentence)
 {
+#elif defined (__MBED__)
+string I2CGPS::calcCRCforMTK(string sentence)
+{
+#endif
   uint8_t crc = 0;
 
   //We need to ignore the first character $
@@ -218,23 +286,47 @@ String I2CGPS::calcCRCforMTK(String sentence)
   for (uint8_t x = 1; x < sentence.length() - 1; x++)
     crc ^= sentence[x]; //XOR this byte with all the others
 
+  #if defined (ARDUINO)
   String output = "";
+  #elif defined (__MBED__)
+  string output = "";
+  #endif
   if (crc < 10)
     output += "0"; //Append leading zero if needed
+
+  #if defined (ARDUINO)
   output += String(crc, HEX);
+  #elif defined (__MBED__)
+  static char outhex[4];
+  sprintf(outhex, "%02X", crc);
+
+  output += outhex;
+  #endif
 
   return (output);
 }
 
+#if defined (ARDUINO)
 boolean I2CGPS::sendPGCMDpacket(String command)
 {
+#elif defined (__MBED__)
+bool I2CGPS::sendPGCMDpacket(string command)
+{
+#endif
   return (sendMTKpacket(command)); // Send process is the same, re-named to ease user's minds
 }
 
+#if defined (ARDUINO)
 String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
 {
   //Build config sentence using packetType
   String configSentence = "";
+#elif defined (__MBED__)
+string I2CGPS::createPGCMDpacket(uint16_t packetType, string dataField)
+{
+  //Build config sentence using packetType
+  string configSentence = "";
+#endif
   configSentence += "$PGCMD,"; //Default header for all PGCMD messages
 
   //Attach the packetType number
@@ -243,7 +335,7 @@ String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
     configSentence += "0";
   if (packetType < 10)
     configSentence += "0";
-  configSentence += packetType;
+  configSentence += to_string(packetType);
 
   //Attach any settings
   if (dataField.length() > 0)
