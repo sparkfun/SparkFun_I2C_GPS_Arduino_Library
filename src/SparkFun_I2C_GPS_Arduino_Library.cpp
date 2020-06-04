@@ -251,7 +251,11 @@ string I2CGPS::createMTKpacket(uint16_t packetType, string dataField)
     configSentence += "0";
   if (packetType < 10)
     configSentence += "0";
+#if defined (ARDUINO)
+  configSentence += String(packetType);
+#elif defined (__MBED__)
   configSentence += to_string(packetType);
+#endif
 
   //Attach any settings
   if (dataField.length() > 0)
@@ -335,7 +339,11 @@ string I2CGPS::createPGCMDpacket(uint16_t packetType, string dataField)
     configSentence += "0";
   if (packetType < 10)
     configSentence += "0";
+#if defined (ARDUINO)
+  configSentence += String(packetType);
+#elif defined (__MBED__)
   configSentence += to_string(packetType);
+#endif
 
   //Attach any settings
   if (dataField.length() > 0)
