@@ -38,7 +38,7 @@
 #include "externs.h"
 #include <cstdlib>
 #include <string>
-#include "TinyGPSPlus/TinyGPS++.h"
+//#include "TinyGPSPlus/TinyGPS++.h"    //uncomment if you also wish to parse the NMEA sentences
 #endif
 
 
@@ -69,7 +69,12 @@ class I2CGPS {
     #if defined(ARDUINO)
     void enableDebugging(Stream &debugPort = Serial); //Output various extra messages to help with debug
     #elif defined (__MBED__)
-    void enableDebugging(Stream &debugPort = pc);
+    #if MBED_MAJOR_VERSION == 6
+    void enableDebugging(UnbufferedSerial &debugPort = pc);
+    #elif MBED_MAJOR_VERSION == 5
+    void enableDebugging(Serial &debugPort = pc);
+    #endif
+
     #endif
 
     void disableDebugging();
@@ -101,16 +106,19 @@ class I2CGPS {
     #if defined(ARDUINO)
     TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
     boolean _printDebug = false; //Flag to print the serial commands we are sending to the Serial port for debug
+    Stream *_debugSerial; //The stream to send debug messages to if enabled
+    
     #elif defined (__MBED__)
     I2C *_i2cPort; //The generic connection to user's chosen I2C hardware
     bool _printDebug = false; //Flag to print the serial commands we are sending to the Serial port for debug
-    #endif
     uint8_t _i2caddr;
-
-    
-
-    Stream *_debugSerial; //The stream to send debug messages to if enabled
+    #if MBED_MAJOR_VERSION == 6
+    UnbufferedSerial *_debugSerial;
+    #elif MBED_MAJOR_VERSION == 5
+    Serial *_debugSerial; //The stream to send debug messages to if enabled
+    #endif
+    #endif
 
     uint8_t _head; //Location of next available spot in the gpsData array. Limited to 255.
     uint8_t _tail; //Location of last spot read from gpsData array. Limited to 255.
-};
+}; 
