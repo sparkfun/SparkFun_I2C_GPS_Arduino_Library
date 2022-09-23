@@ -35,7 +35,7 @@ char dummy = 0;
 
 //Sets up the sensor for constant read
 //Returns false if sensor does not respond
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
 boolean I2CGPS::begin(TwoWire &wirePort, uint32_t i2cSpeed)
 {
   //Bring in the user's choices
@@ -89,7 +89,7 @@ void I2CGPS::check()
 
   for (uint8_t x = 0; x < MAX_PACKET_SIZE; x++)
   {
-    #if defined (ARDUINO)
+    #if defined (ARDUINO) || defined(PARTICLE)
     if (x % 32 == 0)                          //Arduino can only Wire.read() in 32 byte chunks. Yay.
       _i2cPort->requestFrom(MT333x_ADDR, 32); //Request 32 more bytes
 
@@ -106,7 +106,7 @@ void I2CGPS::check()
       _head %= MAX_PACKET_SIZE; //Wrap variable
 
       if (_printDebug == true && _head == _tail)
-        #if defined (ARDUINO)
+        #if defined (ARDUINO) || defined(PARTICLE)
         _debugSerial->println(F("Buffer overrun"));
         #elif defined (__MBED__)
         _debugSerial->printf("Buffer overrun\n");
@@ -168,7 +168,7 @@ void I2CGPS::disableDebugging()
 //Send a given command or configuration string to the module
 //The input buffer on the MTK is 255 bytes. Caller must keep strings shorter than 255 bytes
 //Any time you end transmission you must give the module 10ms to process bytes
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
 boolean I2CGPS::sendMTKpacket(String command)
 {
   if (command.length() > 255)
@@ -232,7 +232,7 @@ bool I2CGPS::sendMTKpacket(string command)
 //config sentence complete with CRC and \r \n ending bytes
 //PMTK uses a different packet numbers to do configure the module.
 //These vary from 0 to 999. See 'MTK NMEA Packet' datasheet for more info.
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
 String I2CGPS::createMTKpacket(uint16_t packetType, String dataField)
 {
   //Build config sentence using packetType
@@ -251,7 +251,7 @@ string I2CGPS::createMTKpacket(uint16_t packetType, string dataField)
     configSentence += "0";
   if (packetType < 10)
     configSentence += "0";
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
   configSentence += String(packetType);
 #elif defined (__MBED__)
   configSentence += to_string(packetType);
@@ -276,7 +276,7 @@ string I2CGPS::createMTKpacket(uint16_t packetType, string dataField)
 
 //Calculate CRC for MTK messages
 //Given a string of characters, XOR them all together and return CRC in string form
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
 String I2CGPS::calcCRCforMTK(String sentence)
 {
 #elif defined (__MBED__)
@@ -290,7 +290,7 @@ string I2CGPS::calcCRCforMTK(string sentence)
   for (uint8_t x = 1; x < sentence.length() - 1; x++)
     crc ^= sentence[x]; //XOR this byte with all the others
 
-  #if defined (ARDUINO)
+  #if defined (ARDUINO) || defined(PARTICLE)
   String output = "";
   #elif defined (__MBED__)
   string output = "";
@@ -298,7 +298,7 @@ string I2CGPS::calcCRCforMTK(string sentence)
   if (crc < 10)
     output += "0"; //Append leading zero if needed
 
-  #if defined (ARDUINO)
+  #if defined (ARDUINO) || defined(PARTICLE)
   output += String(crc, HEX);
   #elif defined (__MBED__)
   static char outhex[4];
@@ -310,7 +310,7 @@ string I2CGPS::calcCRCforMTK(string sentence)
   return (output);
 }
 
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
 boolean I2CGPS::sendPGCMDpacket(String command)
 {
 #elif defined (__MBED__)
@@ -320,7 +320,7 @@ bool I2CGPS::sendPGCMDpacket(string command)
   return (sendMTKpacket(command)); // Send process is the same, re-named to ease user's minds
 }
 
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
 String I2CGPS::createPGCMDpacket(uint16_t packetType, String dataField)
 {
   //Build config sentence using packetType
@@ -339,7 +339,7 @@ string I2CGPS::createPGCMDpacket(uint16_t packetType, string dataField)
     configSentence += "0";
   if (packetType < 10)
     configSentence += "0";
-#if defined (ARDUINO)
+#if defined (ARDUINO) || defined(PARTICLE)
   configSentence += String(packetType);
 #elif defined (__MBED__)
   configSentence += to_string(packetType);
