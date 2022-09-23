@@ -39,6 +39,8 @@
 #include <cstdlib>
 #include <string>
 #include "TinyGPSPlus/TinyGPS++.h"
+#elif defined(PARTICLE)
+#include"Particle.h"
 #endif
 
 
@@ -56,7 +58,7 @@ class I2CGPS {
   public:
 
     //By default use Wire, standard I2C speed, and the default AK9750 address
-    #if defined(ARDUINO)
+    #if defined(ARDUINO) || defined(PARTICLE)
     boolean begin(TwoWire &wirePort = Wire, uint32_t i2cSpeed = I2C_SPEED_STANDARD);
     #elif defined (__MBED__)
     bool begin(I2C &wirePort = i2c, uint32_t i2cSpeed = I2C_SPEED_STANDARD);
@@ -66,7 +68,7 @@ class I2CGPS {
     uint8_t available(); //Returns available number of bytes. Will call check() if zero is available.
     uint8_t read(); //Returns the next available byte
 
-    #if defined(ARDUINO)
+    #if defined(ARDUINO) || defined(PARTICLE)
     void enableDebugging(Stream &debugPort = Serial); //Output various extra messages to help with debug
     #elif defined (__MBED__)
     void enableDebugging(Stream &debugPort = pc);
@@ -74,7 +76,7 @@ class I2CGPS {
 
     void disableDebugging();
 
-    #if defined(ARDUINO)
+    #if defined(ARDUINO) || defined(PARTICLE)
     boolean sendMTKpacket(String command);
     String createMTKpacket(uint16_t packetType, String dataField);
     String calcCRCforMTK(String sentence); //XORs all bytes between $ and *
@@ -98,7 +100,7 @@ class I2CGPS {
   private:
 
     //Variables
-    #if defined(ARDUINO)
+    #if defined(ARDUINO) || defined(PARTICLE)
     TwoWire *_i2cPort; //The generic connection to user's chosen I2C hardware
     boolean _printDebug = false; //Flag to print the serial commands we are sending to the Serial port for debug
     #elif defined (__MBED__)
