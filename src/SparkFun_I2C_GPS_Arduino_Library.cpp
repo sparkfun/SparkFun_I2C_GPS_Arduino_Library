@@ -49,7 +49,7 @@ boolean I2CGPS::begin(TwoWire &wirePort, uint32_t i2cSpeed)
 
   //Ping the module to see if it responds
   _i2cPort->beginTransmission(MT333x_ADDR);
-  _i2cPort->write(0); //Write dummy value
+  _i2cPort->write((byte) 0x00); //Write dummy value
   _i2cPort->endTransmission();
 
   if (_i2cPort->requestFrom(MT333x_ADDR, 1))
