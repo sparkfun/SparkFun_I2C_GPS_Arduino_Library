@@ -53,6 +53,9 @@ boolean I2CGPS::begin(TwoWire &wirePort, uint32_t i2cSpeed)
   _i2cPort->endTransmission();
 
   if (_i2cPort->requestFrom(MT333x_ADDR, 1))
+    while(_i2cPort->available()) {
+      _i2cPort->read();
+    }
     return (true); //Success!
   else
     return (false); //Module failed to respond
